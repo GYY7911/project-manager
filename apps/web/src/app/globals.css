@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Dark theme - Gemini style */
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --radius: 0.5rem;
+
+    /* Status colors - dark mode (light text on transparent bg) */
+    --status-red: 0 84% 60%;
+    --status-red-bg: 0 84% 60% / 0.15;
+    --status-orange: 24 95% 53%;
+    --status-orange-bg: 24 95% 53% / 0.15;
+    --status-yellow: 48 96% 53%;
+    --status-yellow-bg: 48 96% 53% / 0.15;
+    --status-green: 142 71% 45%;
+    --status-green-bg: 142 71% 45% / 0.15;
+    --status-blue: 217 91% 60%;
+    --status-blue-bg: 217 91% 60% / 0.15;
+    --status-violet: 263 70% 50%;
+    --status-violet-bg: 263 70% 50% / 0.15;
+    --status-amber: 38 92% 50%;
+    --status-amber-bg: 38 92% 50% / 0.15;
+
+    /* Border colors for dark mode */
+    --border-subtle: 217.2 32.6% 17.5% / 0.5;
+    --border-default: 217.2 32.6% 17.5%;
+  }
+
+  /* Light theme - 智谱GLM style */
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 94%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 221 83% 53%;
+
+    /* Status colors - light mode (darker text for readability) */
+    --status-red: 0 72% 51%;
+    --status-red-bg: 0 84% 60% / 0.12;
+    --status-orange: 24 95% 40%;
+    --status-orange-bg: 24 95% 53% / 0.12;
+    --status-yellow: 38 92% 35%;
+    --status-yellow-bg: 48 96% 53% / 0.12;
+    --status-green: 142 71% 35%;
+    --status-green-bg: 142 71% 45% / 0.12;
+    --status-blue: 217 91% 45%;
+    --status-blue-bg: 217 91% 60% / 0.12;
+    --status-violet: 263 70% 40%;
+    --status-violet-bg: 263 70% 50% / 0.12;
+    --status-amber: 32 95% 40%;
+    --status-amber-bg: 38 92% 50% / 0.12;
+
+    /* Border colors for light mode */
+    --border-subtle: 214 32% 88% / 0.8;
+    --border-default: 214 32% 88%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* 玻璃态效果 - Dark mode (Gemini style) */
+.glass {
+  @apply backdrop-blur-xl;
+  background: hsl(var(--card) / 0.6);
+  border: 1px solid hsl(var(--border-subtle));
+}
+
+/* Light mode glass effect (智谱 style) */
+.light .glass {
+  @apply shadow-sm;
+  background: hsl(0 0% 100% / 0.9);
+  border: 1px solid hsl(var(--border));
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-white/20 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-white/30;
+}
+
+/* Light mode scrollbar */
+.light ::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* 动画 */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  background-size: 200% 100%;
+}

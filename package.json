@@ -1,0 +1,43 @@
+{
+  "name": "project-manager",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start:dev": "node scripts/kill-ports.js && pnpm dev",
+    "dev": "turbo dev",
+    "dev:enhanced": "pnpm --filter=server dev:enhanced & pnpm --filter=web dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "dev:web": "turbo dev --filter=web",
+    "dev:server": "turbo dev --filter=server",
+    "build:web": "turbo build --filter=web",
+    "build:server": "turbo build --filter=server",
+    "db:generate": "pnpm --filter=server db:generate",
+    "db:push": "pnpm --filter=server db:push",
+    "db:migrate": "pnpm --filter=server db:migrate",
+    "db:studio": "pnpm --filter=server db:studio",
+    "db:reset": "pnpm --filter=server db:reset",
+    "test": "node scripts/run-tests.js",
+    "test:quick": "node scripts/run-tests.js --quick",
+    "test:unit": "pnpm --filter=server test && pnpm --filter=web test:run",
+    "test:server": "pnpm --filter=server test",
+    "test:web": "pnpm --filter=web test",
+    "test:e2e": "playwright test --config=e2e/playwright.config.ts",
+    "test:e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui",
+    "test:e2e:debug": "playwright test --config=e2e/playwright.config.ts --debug",
+    "test:api": "pnpm --filter=server test:e2e",
+    "env:reset": "node scripts/env-reset.js",
+    "env:reset:full": "node scripts/env-reset.js --full --start",
+    "env:setup": "node scripts/env-setup.js",
+    "pretest:e2e": "pnpm env:reset"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

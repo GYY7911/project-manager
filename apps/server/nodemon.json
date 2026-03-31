@@ -1,0 +1,14 @@
+{
+  "watch": ["src", "prisma"],
+  "ext": "ts,prisma",
+  "ignore": ["src/**/*.spec.ts", "dist"],
+  "exec": "nest start --watch",
+  "events": {
+    "restart": "echo '\\n🔄 检测到文件变更，重启服务...\\n'"
+  },
+  "delay": 1000,
+  "verbose": false,
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

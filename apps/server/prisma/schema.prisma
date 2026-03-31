@@ -1,0 +1,398 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户/员工表
+model User {
+  id         String   @id @default(cuid())
+  employeeNo String   @unique // 工号，如 z00123123
+  name       String   // 姓名，如 张三
+  username   String   @unique
+  password   String   // 加密密码
+  role       UserRole @default(MEMBER)
+  team       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // 关联关系
+  requirements       Requirement[]      @relation("RequirementAssignee")
+  issues             Issue[]            @relation("IssueAssignee")
+  creditRecords      CreditRecord[]
+  creditSummaries    CreditSummary[]
+  createdCreditRules CreditRule[]       @relation("CreditRuleCreator")
+  workflowLogs       WorkflowLog[]
+  testCycles         TestCycle[]        @relation("TestCycleCreator")
+  planChangeLogs     PlanChangeLog[]
+  creditCorrections  CreditCorrection[] // 矫正操作记录
+
+  @@map("users")
+}
+
+enum UserRole {
+  PM
+  MEMBER
+  ADMIN
+}
+
+// 版本表
+model Version {
+  id        String        @id @default(cuid())
+  name      String        @unique // 如 V2026.Q1
+  startDate DateTime
+  endDate   DateTime
+  status    VersionStatus @default(PLANNING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // 关联关系
+  requirements Requirement[]
+  issues       Issue[]
+  testCycles   TestCycle[]
+  creditRecords CreditRecord[]
+  creditSummaries CreditSummary[]
+  delayConfigs  DelayConfig[]
+
+  @@map("versions")
+}
+
+enum VersionStatus {
+  PLANNING
+  DEVELOPMENT
+  TESTING
+  RELEASED
+}
+
+// 需求表
+model Requirement {
+  id           String           @id @default(cuid())
+  code         String           @unique // 如 FE2026030912345
+  title        String
+  description  String?
+  type         String?
+  status       RequirementStatus @default(DRAFT)
+  currentStage WorkflowStage    @default(REQUIREMENT_DESIGN)
+  workload     Int?             // 工作量，仅PM可见
+  dueDate      DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // 关联关系
+  versionId String
+  version   Version @relation(fields: [versionId], references: [id])
+
+  assigneeId String
+  assignee   User    @relation("RequirementAssignee", fields: [assigneeId], references: [id])
+
+  issues       Issue[]
+  workflowLogs WorkflowLog[]
+  creditRecords CreditRecord[]
+
+  @@map("requirements")
+}
+
+enum RequirementStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+}
+
+// 问题单表
+model Issue {
+  id           String        @id @default(cuid())
+  code         String        @unique
+  title        String
+  description  String?
+  severity     IssueSeverity @default(MEDIUM)
+  status       IssueStatus   @default(OPEN)
+  currentStage WorkflowStage @default(ISSUE_FIX) // 当前工作流阶段
+  ccbApproved  Boolean       @default(false)
+  dueDate      DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // 关联关系
+  versionId String
+  version   Version @relation(fields: [versionId], references: [id])
+
+  assigneeId String
+  assignee   User    @relation("IssueAssignee", fields: [assigneeId], references: [id])
+
+  requirementId String?
+  requirement   Requirement? @relation(fields: [requirementId], references: [id])
+
+  testCycleId   String?
+  testCycle     TestCycle?   @relation(fields: [testCycleId], references: [id])
+
+  workflowLogs WorkflowLog[]
+  creditRecords CreditRecord[]
+
+  @@map("issues")
+}
+
+enum IssueSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  FIXED
+  VERIFIED
+  CLOSED
+}
+
+// 转测版本表（动态列）
+model TestCycle {
+  id        String   @id @default(cuid())
+  name      String   // 如 "转测1"
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  // 关联关系
+  versionId String
+  version   Version @relation(fields: [versionId], references: [id])
+
+  createdById String?
+  createdBy   User?   @relation("TestCycleCreator", fields: [createdById], references: [id])
+
+  issues Issue[]
+
+  @@unique([versionId, name])
+  @@map("test_cycles")
+}
+
+// 信用规则表
+model CreditRule {
+  id          String          @id @default(cuid())
+  ruleType    CreditRuleType
+  name        String
+  description String?
+  score       Int             // 正数加分，负数扣分
+  delayDays   Int?            // 延期天数，仅DELAY类型
+  isCustom    Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // 关联关系
+  createdById String?
+  createdBy   User?           @relation("CreditRuleCreator", fields: [createdById], references: [id])
+
+  creditRecords CreditRecord[]
+
+  @@unique([ruleType, name], name: "ruleType_name")
+  @@map("credit_rules")
+}
+
+enum CreditRuleType {
+  REQUIREMENT_COMPLETE
+  ISSUE_COMPLETE
+  DELAY
+  REVIEW_DELAY
+  MANUAL
+}
+
+// 信用记录表（统一数据源）
+model CreditRecord {
+  id         String          @id @default(cuid())
+  score      Int
+  sourceType CreditSourceType
+  remark     String?
+  createdAt  DateTime        @default(now())
+
+  // 矫正相关字段
+  isCorrected      Boolean   @default(false)  // 是否被矫正过
+  correctedAt      DateTime?                  // 矫正时间
+  correctedBy      String?                    // 矫正操作人ID
+  correctionRemark String?                    // 矫正原因
+
+  // 阶段和延期信息（用于明细展示）
+  workflowStage    String?                    // 关联的工作流阶段
+  delayDays        Int?                       // 延期天数（正数=延期，0=按时）
+  plannedDate      DateTime?                  // 计划日期
+  actualDate       DateTime?                  // 实际完成日期
+
+  // 关联关系
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  ruleId String?
+  rule   CreditRule? @relation(fields: [ruleId], references: [id])
+
+  sourceId String? // 关联的需求/问题单ID
+
+  versionId String?
+  version   Version? @relation(fields: [versionId], references: [id])
+
+  requirementId String?
+  requirement   Requirement? @relation(fields: [requirementId], references: [id])
+
+  issueId String?
+  issue   Issue? @relation(fields: [issueId], references: [id])
+
+  // 矫正历史记录
+  corrections CreditCorrection[]
+
+  @@map("credit_records")
+}
+
+enum CreditSourceType {
+  REQUIREMENT
+  ISSUE
+  MANUAL_ADJUST
+}
+
+// 信用汇总表
+model CreditSummary {
+  id                String   @id @default(cuid())
+  totalScore        Int      @default(0)
+  requirementScore  Int      @default(0)
+  issueScore        Int      @default(0)
+  delayDeduction    Int      @default(0)
+  manualAdjustment  Int      @default(0)
+  updatedAt         DateTime @updatedAt
+
+  // 关联关系
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  versionId String
+  version   Version @relation(fields: [versionId], references: [id])
+
+  @@unique([userId, versionId])
+  @@map("credit_summaries")
+}
+
+// 信用矫正记录表
+model CreditCorrection {
+  id          String   @id @default(cuid())
+  recordId    String   // 被矫正的信用记录ID
+  correctionType String // 'time_correction' | 'score_override'
+
+  // 原始数据快照
+  originalPlannedDate  DateTime?
+  originalActualDate   DateTime?
+  originalDelayDays    Int?
+  originalScore        Int
+
+  // 矫正后数据
+  correctedPlannedDate DateTime?
+  correctedActualDate  DateTime?
+  correctedDelayDays   Int?
+  correctedScore       Int
+
+  // 分数变化
+  scoreDiff   Int      // 分数差值（正数=补回分数，负数=额外扣分）
+  reason      String   // 矫正原因（必填）
+  createdAt   DateTime @default(now())
+
+  // 关联关系
+  record      CreditRecord @relation(fields: [recordId], references: [id])
+
+  operatedBy  String
+  operator    User   @relation(fields: [operatedBy], references: [id])
+
+  @@map("credit_corrections")
+}
+
+// 工作流日志表
+model WorkflowLog {
+  id         String      @id @default(cuid())
+  entityType String      // 'requirement' | 'issue'
+  fromStage  WorkflowStage?
+  toStage    WorkflowStage
+  remark     String?
+  createdAt  DateTime    @default(now())
+
+  // 关联关系
+  entityId String // 需求或问题单的ID
+
+  operatedBy String
+  operator   User @relation(fields: [operatedBy], references: [id])
+
+  requirementId String?
+  requirement   Requirement? @relation(fields: [requirementId], references: [id])
+
+  issueId String?
+  issue   Issue? @relation(fields: [issueId], references: [id])
+
+  @@map("workflow_logs")
+}
+
+enum WorkflowStage {
+  REQUIREMENT_DESIGN
+  ALPHA_TEST_DESIGN
+  DOCUMENT_SIGN
+  FEATURE_DEV
+  ALPHA_CASE_DEV
+  SOP_UPGRADE
+  VERSION_TEST
+  ISSUE_FIX
+  CCB_REVIEW
+  RELEASE
+}
+
+// 看板模板表
+model KanbanTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  config    Json
+  isDefault Boolean  @default(false)
+  createdById String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("kanban_templates")
+}
+
+// 用户看板配置表
+model UserKanbanConfig {
+  id       String   @id @default(cuid())
+  userId   String   @unique
+  config   Json
+  isCustom Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("user_kanban_configs")
+}
+
+// 延期配置表
+model DelayConfig {
+  id             String   @id @default(cuid())
+  entityId       String   // 需求ID 或 问题单ID
+  entityType     String   // 'requirement' | 'issue'
+  versionId      String
+  stageDeadlines Json     // StageDeadline[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  version        Version  @relation(fields: [versionId], references: [id])
+
+  @@unique([entityId, versionId])
+  @@map("delay_configs")
+}
+
+// 计划变更日志表
+model PlanChangeLog {
+  id          String   @id @default(cuid())
+  entityType  String   // 'requirement' | 'issue'
+  entityId    String   // 需求或问题单ID
+  changeType  String   // 'stage_change' | 'deadline_change'
+  oldValue    String?  // JSON 格式
+  newValue    String?  // JSON 格式
+  reason      String   // 变更原因（必填）
+  createdAt   DateTime @default(now())
+
+  operatedBy String
+  operator   User   @relation(fields: [operatedBy], references: [id])
+
+  @@index([entityType, entityId])
+  @@map("plan_change_logs")
+}

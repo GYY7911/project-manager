@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+.output/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+apps/server/.env
+apps/web/.env.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Cache
+.turbo/
+.cache/
+*.tsbuildinfo
+
+# Database
+*.db
+*.db-journal
+
+# Project plan (private)
+.project-plan.md
+
+# Testing
+coverage/
+test-results/
+
+# Debug files
+debug-*.png
+debug-*.mjs
+debug-*.spec.ts
+DEBUG.md
+
+# Claude Code
+.claude/
