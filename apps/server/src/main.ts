@@ -20,15 +20,16 @@ async function bootstrap() {
   );
 
   // CORS配置
+  const configService = app.get(ConfigService);
+  const corsOrigins = configService.get('CORS_ORIGINS', 'http://localhost:4000');
   app.enableCors({
-    origin: ['http://localhost:4000'],
+    origin: corsOrigins.split(',').map((s: string) => s.trim()),
     credentials: true,
   });
 
   // API前缀
   app.setGlobalPrefix('api');
 
-  const configService = app.get(ConfigService);
   const port = configService.get('PORT', 4001);
 
   await app.listen(port);

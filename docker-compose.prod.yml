@@ -32,9 +32,7 @@ services:
       retries: 10
 
   server:
-    build:
-      context: .
-      dockerfile: Dockerfile.server
+    image: pm-server:latest
     container_name: pm-server
     restart: unless-stopped
     ports:
@@ -52,9 +50,7 @@ services:
         condition: service_healthy
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile.web
+    image: pm-web:latest
     container_name: pm-web
     restart: unless-stopped
     ports:

@@ -757,46 +757,57 @@ Content-Type: application/json
 
 ## 🚢 部署说明
 
-### Docker 部署 (推荐)
+> 详细部署指南请参考 [OFFLINE-DEPLOY.md](OFFLINE-DEPLOY.md)
+
+### PM2 部署（推荐，无需 Docker）
+
+适合不允许使用 Docker 的企业环境。
 
 ```bash
-# 1. 构建镜像
-docker-compose build
+# 1. 安装前提条件
+npm install -g pnpm@9.15.0 pm2
+bash scripts/install-services.sh    # 辅助安装 PostgreSQL
 
-# 2. 启动服务
-docker-compose up -d
+# 2. 一键部署
+bash deploy-pm2.sh
 
-# 3. 查看日志
-docker-compose logs -f
+# 3. 运维管理
+bash scripts/pm2-ops.sh status      # 查看状态
+bash scripts/pm2-ops.sh logs        # 查看日志
+bash scripts/pm2-ops.sh restart     # 重启服务
+
+# 4. 停止服务（优雅关闭）
+pm2 stop all                        # 停止所有进程
+pm2 delete all                      # 删除所有进程
+pm2 save --force                    # 清空保存的进程列表
+
+# 如果 PostgreSQL 用的是 Docker 容器
+docker stop pm-postgres && docker rm pm-postgres
 ```
 
-### 手动部署
+### Docker 部署
+
+适合允许使用 Docker 的环境。
 
 ```bash
-# 1. 安装依赖
-pnpm install --prod
+# 一键部署
+bash deploy.sh
 
-# 2. 构建应用
-pnpm build
-
-# 3. 数据库迁移
-pnpm db:migrate
-
-# 4. 启动后端
-NODE_ENV=production node apps/server/dist/src/main.js
-
-# 5. 启动前端
-NODE_ENV=production node apps/web/.next/standalone/server.js
+# 或离线部署
+bash scripts/build-offline.sh       # 联网环境构建镜像
+# 拷贝 offline-bundle/ 到目标机器
+bash load-and-start.sh              # 离线环境启动
 ```
 
 ### 生产环境变量
+
+配置在 `ecosystem.config.js`（PM2）或 `docker-compose.yml`（Docker）中：
 
 ```env
 NODE_ENV=production
 DATABASE_URL="postgresql://prod_user:***@prod-db:5432/pm"
 JWT_SECRET="your-very-secure-production-secret-key"
-REDIS_URL="redis://prod-redis:6379"
-PORT=3000
+PORT=4001
 ```
 
 ---

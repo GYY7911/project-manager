@@ -54,3 +54,9 @@ DEBUG.md
 
 # Claude Code
 .claude/
+
+# Offline bundle (too large for GitHub)
+offline-bundle/
+
+# Offline deps
+deps/

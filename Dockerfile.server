@@ -1,0 +1,38 @@
+# ===== NestJS 后端 =====
+FROM node:20-alpine
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+RUN apk add --no-cache openssl python3 make g++
+WORKDIR /app
+
+COPY .npmrc.docker .npmrc
+
+# Copy workspace config
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json turbo.json ./
+COPY packages/shared/package.json packages/shared/
+COPY apps/server/package.json apps/server/
+
+RUN pnpm install --frozen-lockfile
+
+# Copy source
+COPY packages/shared/ packages/shared/
+COPY apps/server/ apps/server/
+
+# Build shared package
+RUN TSC=$(find /app/node_modules/.pnpm -path "*/typescript/bin/tsc" | head -1) && \
+    cd packages/shared && node "$TSC" && \
+    sed -i 's|"main": "./src/index.ts"|"main": "./dist/index.js"|' package.json
+
+# Generate Prisma client
+RUN PRISMA=$(find /app/node_modules/.pnpm -path "*/prisma/build/index.js" -not -path "*/@prisma/*" | head -1) && \
+    cd apps/server && node "$PRISMA" generate --schema=prisma/schema.prisma
+
+# Build server
+RUN NEST=$(find /app/node_modules/.pnpm -path "*/@nestjs/cli/bin/nest.js" | head -1) && \
+    cd apps/server && node "$NEST" build
+
+RUN rm -rf packages/shared/src apps/server/src apps/server/test
+
+ENV NODE_ENV=production
+EXPOSE 4001
+WORKDIR /app/apps/server
+CMD ["node", "dist/src/main.js"]

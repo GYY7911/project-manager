@@ -40,6 +40,7 @@ interface GanttData {
 interface GanttChartProps {
   data: GanttData[] | null;
   isLoading: boolean;
+  onItemClick?: (item: any) => void;
 }
 
 const stageLabels: Record<string, string> = {

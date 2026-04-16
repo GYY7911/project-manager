@@ -1,0 +1,39 @@
+node_modules
+.git
+.gitignore
+.venv
+.turbo
+.claude
+.vscode
+.idea
+
+# Debug files
+debug-*.png
+DEBUG.md
+debug-*.mjs
+debug-*.spec.ts
+
+# Test artifacts
+test-results
+e2e
+coverage
+.nyc_output
+
+# Misc
+*.log
+*.md
+!apps/server/prisma/*.md
+.env.local
+.env.*.local
+.DS_Store
+Thumbs.db
+
+# Scripts (dev-only)
+scripts/kill-ports.js
+scripts/dev-with-prisma.js
+scripts/run-tests.js
+scripts/env-reset.js
+scripts/env-setup.js
+
+# Bat files
+*.bat
