@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreditRuleService, CreateCreditRuleDto } from './credit-rule.service';
+import { CreditRuleService } from './credit-rule.service';
+import { CreateCreditRuleDto } from './credit.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreditRuleType } from '@prisma/client';
 

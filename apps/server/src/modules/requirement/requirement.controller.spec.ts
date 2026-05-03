@@ -1,11 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RequirementController } from './requirement.controller';
-import {
-  RequirementService,
-  CreateRequirementDto,
-  UpdateRequirementDto,
-  UpdateStageDto,
-} from './requirement.service';
+import { RequirementService } from './requirement.service';
+import { CreateRequirementDto, UpdateRequirementDto, UpdateStageDto } from './requirement.dto';
 import { WorkflowStage, RequirementStatus, UserRole } from '@prisma/client';
 
 describe('RequirementController', () => {

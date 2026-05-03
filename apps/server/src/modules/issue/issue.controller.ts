@@ -10,12 +10,8 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import {
-  IssueService,
-  CreateIssueDto,
-  UpdateIssueDto,
-  UpdateIssueStageDto,
-} from './issue.service';
+import { IssueService } from './issue.service';
+import { CreateIssueDto, UpdateIssueDto, UpdateIssueStageDto } from './issue.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';

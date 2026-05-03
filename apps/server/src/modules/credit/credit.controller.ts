@@ -10,8 +10,10 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { CreditService, CorrectRecordDto, BatchCorrectDto } from './credit.service';
-import { CreditRuleService, CreateCreditRuleDto } from './credit-rule.service';
+import { CreditService } from './credit.service';
+import { CreditCorrectionService } from './credit-correction.service';
+import { CorrectRecordDto, BatchCorrectDto, CreateCreditRuleDto } from './credit.dto';
+import { CreditRuleService } from './credit-rule.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -22,6 +24,7 @@ import { UserRole } from '@prisma/client';
 export class CreditController {
   constructor(
     private creditService: CreditService,
+    private correctionService: CreditCorrectionService,
     private ruleService: CreditRuleService,
   ) {}
 
@@ -140,7 +143,7 @@ export class CreditController {
   @Roles(UserRole.PM, UserRole.ADMIN)
   @UseGuards(RolesGuard)
   async previewCorrection(@Body() dto: CorrectRecordDto) {
-    return this.creditService.previewCorrection(dto);
+    return this.correctionService.previewCorrection(dto);
   }
 
   @Post('correct')
@@ -150,7 +153,7 @@ export class CreditController {
     @Body() dto: CorrectRecordDto,
     @Request() req: any,
   ) {
-    return this.creditService.correctRecord(dto, req.user.id);
+    return this.correctionService.correctRecord(dto, req.user.id);
   }
 
   @Post('batch-correct')
@@ -160,14 +163,14 @@ export class CreditController {
     @Body() dto: BatchCorrectDto,
     @Request() req: any,
   ) {
-    return this.creditService.batchCorrectRecords(dto, req.user.id);
+    return this.correctionService.batchCorrectRecords(dto, req.user.id);
   }
 
   @Get('corrections/:recordId')
   @Roles(UserRole.PM, UserRole.ADMIN)
   @UseGuards(RolesGuard)
   async getCorrectionHistory(@Param('recordId') recordId: string) {
-    return this.creditService.getCorrectionHistory(recordId);
+    return this.correctionService.getCorrectionHistory(recordId);
   }
 
   // ===== 新增：版本延期率检查 =====

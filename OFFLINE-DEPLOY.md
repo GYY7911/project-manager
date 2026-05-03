@@ -1,15 +1,10 @@
 # 部署指南
 
-本指南提供两种部署方式：
-
-| 方式 | 适用场景 | 依赖 |
-|------|----------|------|
-| **PM2 部署（推荐）** | 不允许使用 Docker 的环境 | Node.js + PM2 + PostgreSQL |
-| **Docker 部署** | 允许使用 Docker 的环境 | Docker + Docker Compose |
+PM 项目管理系统使用 PM2 进行生产部署。
 
 ---
 
-## 方式一：PM2 部署（推荐，无需 Docker）
+## PM2 部署
 
 ### 架构
 
@@ -150,74 +145,9 @@ bash deploy-pm2.sh
 
 ---
 
-## 方式二：Docker 部署
-
-### 前提条件
-
-目标机器需要安装：
-- **Docker** (>= 20.10)
-- **Docker Compose** (>= 2.0)
-
-```bash
-docker --version
-docker compose version
-```
-
-### 一键部署
-
-```bash
-bash deploy.sh
-```
-
-### 离线 Docker 部署
-
-#### 步骤 1：联网环境 — 构建镜像
-
-```bash
-bash scripts/build-offline.sh
-```
-
-产物目录结构：
-```
-offline-bundle/
-├── images/
-│   ├── postgres.tar
-│   ├── redis.tar
-│   ├── pm-server.tar
-│   └── pm-web.tar
-├── docker-compose.prod.yml
-├── load-and-start.sh
-└── .env
-```
-
-#### 步骤 2：传输到离线环境
-
-将整个 `offline-bundle/` 目录复制到目标机器。
-
-#### 步骤 3：离线启动
-
-```bash
-cd offline-bundle/
-bash load-and-start.sh
-```
-
-### Docker 运维命令
-
-```bash
-docker compose ps                    # 查看状态
-docker compose logs -f server        # 后端日志
-docker compose logs -f web           # 前端日志
-docker compose down                  # 停止服务
-docker compose down -v               # 停止并清除数据
-docker compose restart server        # 重启单个服务
-```
-
----
-
 ## 环境变量配置
 
 PM2 方式的环境变量在 `ecosystem.config.js` 中配置。
-Docker 方式的环境变量在 `docker-compose.yml` 中配置。
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|

@@ -92,6 +92,8 @@ model Requirement {
   workflowLogs WorkflowLog[]
   creditRecords CreditRecord[]
 
+  @@index([versionId, currentStage])
+  @@index([status])
   @@map("requirements")
 }
 
@@ -132,6 +134,8 @@ model Issue {
   workflowLogs WorkflowLog[]
   creditRecords CreditRecord[]
 
+  @@index([versionId, currentStage])
+  @@index([status])
   @@map("issues")
 }
 
@@ -241,6 +245,7 @@ model CreditRecord {
   // 矫正历史记录
   corrections CreditCorrection[]
 
+  @@index([userId, versionId])
   @@map("credit_records")
 }
 
@@ -324,6 +329,7 @@ model WorkflowLog {
   issueId String?
   issue   Issue? @relation(fields: [issueId], references: [id])
 
+  @@index([entityType, entityId])
   @@map("workflow_logs")
 }
 

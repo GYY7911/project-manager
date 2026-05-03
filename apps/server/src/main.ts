@@ -7,10 +7,10 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 全局 Prisma 异常过滤器
+  // Global Prisma exception filter
   app.useGlobalFilters(new PrismaExceptionFilter());
 
-  // 全局验证管道
+  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -19,7 +19,7 @@ async function bootstrap() {
     }),
   );
 
-  // CORS配置
+  // CORS configuration
   const configService = app.get(ConfigService);
   const corsOrigins = configService.get('CORS_ORIGINS', 'http://localhost:4000');
   app.enableCors({
@@ -27,7 +27,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // API前缀
+  // API prefix
   app.setGlobalPrefix('api');
 
   const port = configService.get('PORT', 4001);

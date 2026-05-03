@@ -22,7 +22,7 @@ export class CreditScheduler {
 
     const now = new Date();
 
-    // 检查延期的需求
+    // Check delayed requirements
     const delayedRequirements = await this.prisma.requirement.findMany({
       where: {
         dueDate: { lt: now },
@@ -33,7 +33,7 @@ export class CreditScheduler {
     for (const req of delayedRequirements) {
       const delayDays = differenceInDays(now, req.dueDate!);
 
-      // 检查今天是否已经记录过延期
+      // Check if already recorded today
       const todayStart = new Date(now);
       todayStart.setHours(0, 0, 0, 0);
 
@@ -68,7 +68,7 @@ export class CreditScheduler {
       }
     }
 
-    // 检查延期的问题单
+    // Check delayed issues
     const delayedIssues = await this.prisma.issue.findMany({
       where: {
         dueDate: { lt: now },

@@ -223,13 +223,13 @@ export class AnalyticsService {
    * 获取团队总览
    */
   async getTeamOverview(versionId: string, userId?: string, userRole?: UserRole): Promise<TeamOverview> {
-    // 获取版本下所有需求
+    // Get all requirements for this version
     const requirements = await this.prisma.requirement.findMany({
       where: { versionId },
       include: { assignee: true },
     });
 
-    // 获取版本下所有问题单
+    // Get all issues for this version
     const issues = await this.prisma.issue.findMany({
       where: { versionId },
       include: { assignee: true },
@@ -342,7 +342,7 @@ export class AnalyticsService {
     // Member 只能看自己的数据
     const filterUserId = userRole === UserRole.MEMBER ? userId : undefined;
 
-    // 获取版本下所有需求
+    // Get all requirements for this version
     const requirements = await this.prisma.requirement.findMany({
       where: {
         versionId,
@@ -351,7 +351,7 @@ export class AnalyticsService {
       include: { assignee: true },
     });
 
-    // 获取版本下所有问题单
+    // Get all issues for this version
     const issues = await this.prisma.issue.findMany({
       where: {
         versionId,
@@ -373,7 +373,7 @@ export class AnalyticsService {
       allUsers.add(req.assigneeId);
     }
 
-    // 获取用户信息
+    // Get user info
     const users = await this.prisma.user.findMany({
       where: { id: { in: [...allUsers] } },
     });
@@ -550,7 +550,7 @@ export class AnalyticsService {
 
     const results: GanttData[] = [];
 
-    // 获取需求
+    // Get requirement
     const requirements = await this.prisma.requirement.findMany({
       where: {
         versionId,
@@ -565,7 +565,7 @@ export class AnalyticsService {
       },
     });
 
-    // 获取需求变更日志
+    // Get requirement变更日志
     const requirementIds = requirements.map(r => r.id);
     const changeLogs = await this.prisma.planChangeLog.findMany({
       where: {
@@ -584,7 +584,7 @@ export class AnalyticsService {
       changeLogMap.get(log.entityId)!.push(log);
     }
 
-    // 获取延期配置
+    // Get delay config
     const delayConfigs = await this.prisma.delayConfig.findMany({
       where: {
         versionId,
@@ -617,7 +617,7 @@ export class AnalyticsService {
         });
       }
 
-      // 获取计划日期
+      // Get planned date
       const config = delayConfigMap.get(req.id);
       let plannedStartDate: Date | null = null;
       let plannedEndDate: Date | null = null;
@@ -661,7 +661,7 @@ export class AnalyticsService {
       });
     }
 
-    // 获取问题单
+    // Get issue
     const issues = await this.prisma.issue.findMany({
       where: {
         versionId,
@@ -676,7 +676,7 @@ export class AnalyticsService {
       },
     });
 
-    // 获取问题单变更日志
+    // Get issue变更日志
     const issueIds = issues.map(i => i.id);
     const issueChangeLogs = await this.prisma.planChangeLog.findMany({
       where: {
@@ -695,7 +695,7 @@ export class AnalyticsService {
       issueChangeLogMap.get(log.entityId)!.push(log);
     }
 
-    // 获取问题单延期配置
+    // Get issue延期配置
     const issueDelayConfigs = await this.prisma.delayConfig.findMany({
       where: {
         versionId,
@@ -728,7 +728,7 @@ export class AnalyticsService {
         });
       }
 
-      // 获取计划日期
+      // Get planned date
       const config = issueDelayConfigMap.get(issue.id);
       let plannedStartDate: Date | null = null;
       let plannedEndDate: Date | null = null;

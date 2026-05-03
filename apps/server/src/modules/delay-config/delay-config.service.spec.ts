@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DelayConfigService, CreateDelayConfigDto, BatchImportDto } from './delay-config.service';
+import { DelayConfigService } from './delay-config.service';
+import { CreateDelayConfigDto, BatchImportDto } from './delay-config.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 import { WorkflowStage } from '@prisma/client';

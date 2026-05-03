@@ -5,31 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { WorkflowStage } from '@prisma/client';
-
-export interface StageDeadline {
-  stage: WorkflowStage;
-  plannedDate: string;
-}
-
-export interface CreateDelayConfigDto {
-  entityId: string;
-  entityType: 'requirement' | 'issue';
-  versionId: string;
-  stageDeadlines: StageDeadline[];
-  reason?: string; // 变更原因
-  operatedBy?: string; // 操作人ID
-}
-
-export interface BatchImportDto {
-  versionId: string;
-  items: {
-    code: string;
-    stageDeadlines: {
-      stage: string;
-      plannedDate: string;
-    }[];
-  }[];
-}
+import { CreateDelayConfigDto, BatchImportDto, StageDeadlineDto } from './delay-config.dto';
 
 @Injectable()
 export class DelayConfigService {
@@ -73,7 +49,7 @@ export class DelayConfigService {
   }
 
   async createOrUpdate(dto: CreateDelayConfigDto) {
-    // 验证版本是否存在
+    // Verify version exists
     const version = await this.prisma.version.findUnique({
       where: { id: dto.versionId },
     });
@@ -82,7 +58,7 @@ export class DelayConfigService {
       throw new NotFoundException('版本不存在');
     }
 
-    // 验证实体是否存在
+    // Verify entity exists
     if (dto.entityType === 'requirement') {
       const requirement = await this.prisma.requirement.findUnique({
         where: { id: dto.entityId },
@@ -109,7 +85,7 @@ export class DelayConfigService {
 
     // 如果有操作人ID且存在旧配置，记录变更
     if (dto.operatedBy && existing) {
-      const oldDeadlines = existing.stageDeadlines as unknown as StageDeadline[];
+      const oldDeadlines = existing.stageDeadlines as unknown as StageDeadlineDto[];
       const newDeadlines = dto.stageDeadlines;
 
       // 比较旧值和新值
@@ -162,7 +138,7 @@ export class DelayConfigService {
   }
 
   async batchImport(dto: BatchImportDto) {
-    // 验证版本是否存在
+    // Verify version exists
     const version = await this.prisma.version.findUnique({
       where: { id: dto.versionId },
     });
@@ -171,7 +147,7 @@ export class DelayConfigService {
       throw new NotFoundException('版本不存在');
     }
 
-    // 获取版本下所有需求和问题单
+    // Get all requirements and issues for this version
     const [requirements, issues] = await Promise.all([
       this.prisma.requirement.findMany({
         where: { versionId: dto.versionId },
@@ -229,7 +205,7 @@ export class DelayConfigService {
 
       try {
         // 转换阶段名称为枚举
-        const stageDeadlines: StageDeadline[] = item.stageDeadlines
+        const stageDeadlines: StageDeadlineDto[] = item.stageDeadlines
           .filter((s) => s.plannedDate) // 过滤掉空日期
           .map((s) => {
             const stage = stageNameToEnum[s.stage];

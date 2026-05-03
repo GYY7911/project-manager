@@ -28,7 +28,6 @@ PM 是一个面向研发团队的项目管理工具，旨在提供：
 - **可视化看板**：直观的拖拽式任务管理
 - **灵活工作流**：可定制的研发流程阶段
 - **信用系统**：基于贡献度的团队激励机制
-- **实时协作**：WebSocket 驱动的实时更新
 - **数据分析**：团队绩效和项目健康度洞察
 
 ### 用户角色
@@ -56,7 +55,7 @@ PM 是一个面向研发团队的项目管理工具，旨在提供：
 │  │              Zustand + React Query                       │   │
 │  └─────────────────────────────────────────────────────────┘   │
 └────────────────────────────┬────────────────────────────────────┘
-                             │ HTTP / WebSocket
+                              │ HTTP
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Server Layer                              │
@@ -75,8 +74,8 @@ PM 是一个面向研发团队的项目管理工具，旨在提供：
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Data Layer                                │
 │  ┌─────────────────┐           ┌─────────────────┐             │
-│  │   PostgreSQL    │           │      Redis      │             │
-│  │   (主数据库)     │           │   (缓存/会话)    │             │
+│  │   PostgreSQL    │                             │
+│  │   (主数据库)     │                             │
 │  └─────────────────┘           └─────────────────┘             │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -97,7 +96,6 @@ PM 是一个面向研发团队的项目管理工具，旨在提供：
 | ECharts | 6.0 | 图表可视化 |
 | Radix UI | - | 无障碍组件库 |
 | Framer Motion | 11.15 | 动画库 |
-| Socket.io Client | 4.8 | 实时通信 |
 
 #### 后端 (`apps/server`)
 
@@ -106,8 +104,6 @@ PM 是一个面向研发团队的项目管理工具，旨在提供：
 | NestJS | 11.0 | Node.js 框架 |
 | Prisma | 6.4 | ORM |
 | PostgreSQL | - | 主数据库 |
-| Redis (ioredis) | 5.4 | 缓存/会话 |
-| Socket.io | 4.8 | 实时通信 |
 | Passport | 0.7 | 认证中间件 |
 | JWT | - | Token 认证 |
 | class-validator | 0.14 | 数据验证 |
@@ -153,8 +149,6 @@ PM 是一个面向研发团队的项目管理工具，旨在提供：
 | 延期状态显示 | 🟢 绿色 = 剩余天数 / 🔴 红色 = 已延期天数 |
 | 工作量显示 | 仅 PM 角色可见工作量（人/天） |
 | 问题单标识 | 红色左边框 + 严重程度标签 |
-| 实时同步 | WebSocket 驱动的多用户实时更新 |
-
 ### 2. 📋 工作流管理
 
 ```
@@ -257,7 +251,6 @@ Step 4: 配置转测版本
 | Node.js | >= 20.0.0 |
 | pnpm | >= 9.15.0 |
 | PostgreSQL | >= 14 |
-| Redis | >= 6 (可选) |
 
 ### 一键启动 (Windows)
 
@@ -285,10 +278,7 @@ cd project-manager
 # 2. 安装依赖
 pnpm install
 
-# 3. 启动数据库 (Docker)
-docker-compose up -d
-
-# 4. 初始化数据库
+# 3. 初始化数据库
 pnpm db:generate  # 生成 Prisma Client
 pnpm db:push      # 同步数据库结构
 pnpm --filter=server db:seed  # 初始化种子数据
@@ -307,9 +297,6 @@ DATABASE_URL="postgresql://user:password@localhost:5432/pm?schema=public"
 
 # JWT
 JWT_SECRET="your-super-secret-key"
-
-# Redis (可选)
-REDIS_URL="redis://localhost:6379"
 
 # 服务端口
 PORT=3000
@@ -436,7 +423,6 @@ project-manager/
 ├── stop.bat                    # Windows 一键停止
 ├── clean.bat                   # Windows 清理缓存
 ├── reset-db.bat               # Windows 重置数据库
-├── docker-compose.yml         # Docker 编排配置
 ├── pnpm-workspace.yaml        # pnpm 工作区配置
 ├── turbo.json                 # Turborepo 配置
 └── package.json               # 根 package.json
@@ -780,28 +766,11 @@ bash scripts/pm2-ops.sh restart     # 重启服务
 pm2 stop all                        # 停止所有进程
 pm2 delete all                      # 删除所有进程
 pm2 save --force                    # 清空保存的进程列表
-
-# 如果 PostgreSQL 用的是 Docker 容器
-docker stop pm-postgres && docker rm pm-postgres
-```
-
-### Docker 部署
-
-适合允许使用 Docker 的环境。
-
-```bash
-# 一键部署
-bash deploy.sh
-
-# 或离线部署
-bash scripts/build-offline.sh       # 联网环境构建镜像
-# 拷贝 offline-bundle/ 到目标机器
-bash load-and-start.sh              # 离线环境启动
 ```
 
 ### 生产环境变量
 
-配置在 `ecosystem.config.js`（PM2）或 `docker-compose.yml`（Docker）中：
+配置在 `ecosystem.config.js`（PM2）中：
 
 ```env
 NODE_ENV=production

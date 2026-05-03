@@ -1,15 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreditRuleType } from '@prisma/client';
-
-export interface CreateCreditRuleDto {
-  ruleType: CreditRuleType;
-  name: string;
-  description?: string;
-  score: number;
-  delayDays?: number;
-  isCustom?: boolean;
-}
+import { CreateCreditRuleDto } from './credit.dto';
 
 @Injectable()
 export class CreditRuleService {

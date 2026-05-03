@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TestCycleController } from './test-cycle.controller';
-import { TestCycleService, CreateTestCycleDto } from './test-cycle.service';
+import { TestCycleService } from './test-cycle.service';
+import { CreateTestCycleDto } from './test-cycle.dto';
 import { UserRole } from '@prisma/client';
 
 describe('TestCycleController', () => {

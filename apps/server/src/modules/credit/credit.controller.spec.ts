@@ -1,12 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreditController } from './credit.controller';
-import { CreditService, CorrectRecordDto, BatchCorrectDto } from './credit.service';
-import { CreditRuleService, CreateCreditRuleDto } from './credit-rule.service';
+import { CreditService } from './credit.service';
+import { CreditCorrectionService } from './credit-correction.service';
+import { CorrectRecordDto, BatchCorrectDto, CreateCreditRuleDto } from './credit.dto';
+import { CreditRuleService } from './credit-rule.service';
 import { CreditSourceType, CreditRuleType, UserRole } from '@prisma/client';
 
 describe('CreditController', () => {
   let controller: CreditController;
   let creditService: CreditService;
+  let correctionService: CreditCorrectionService;
   let ruleService: CreditRuleService;
 
   const mockCreditService = {
@@ -15,11 +18,14 @@ describe('CreditController', () => {
     getUserSummary: jest.fn(),
     getAllSummaries: jest.fn(),
     getUserCreditDetail: jest.fn(),
+    checkVersionDelayPenalty: jest.fn(),
+  };
+
+  const mockCorrectionService = {
     previewCorrection: jest.fn(),
     correctRecord: jest.fn(),
     batchCorrectRecords: jest.fn(),
     getCorrectionHistory: jest.fn(),
-    checkVersionDelayPenalty: jest.fn(),
   };
 
   const mockRuleService = {
@@ -84,6 +90,10 @@ describe('CreditController', () => {
           useValue: mockCreditService,
         },
         {
+          provide: CreditCorrectionService,
+          useValue: mockCorrectionService,
+        },
+        {
           provide: CreditRuleService,
           useValue: mockRuleService,
         },
@@ -92,6 +102,7 @@ describe('CreditController', () => {
 
     controller = module.get<CreditController>(CreditController);
     creditService = module.get<CreditService>(CreditService);
+    correctionService = module.get<CreditCorrectionService>(CreditCorrectionService);
     ruleService = module.get<CreditRuleService>(CreditRuleService);
   });
 
@@ -278,7 +289,7 @@ describe('CreditController', () => {
     };
 
     it('应该预览矫正效果', async () => {
-      mockCreditService.previewCorrection.mockResolvedValue({
+      mockCorrectionService.previewCorrection.mockResolvedValue({
         originalScore: 5,
         newScore: 10,
         scoreDiff: 5,
@@ -289,7 +300,7 @@ describe('CreditController', () => {
       const result = await controller.previewCorrection(dto);
 
       expect(result.scoreDiff).toBe(5);
-      expect(creditService.previewCorrection).toHaveBeenCalledWith(dto);
+      expect(correctionService.previewCorrection).toHaveBeenCalledWith(dto);
     });
   });
 
@@ -300,7 +311,7 @@ describe('CreditController', () => {
     };
 
     it('应该成功矫正记录', async () => {
-      mockCreditService.correctRecord.mockResolvedValue({
+      mockCorrectionService.correctRecord.mockResolvedValue({
         correction: {},
         scoreDiff: 5,
         message: '已补回 5 分',
@@ -309,7 +320,7 @@ describe('CreditController', () => {
       const result = await controller.correctRecord(dto, mockRequest);
 
       expect(result.message).toBe('已补回 5 分');
-      expect(creditService.correctRecord).toHaveBeenCalledWith(dto, 'user-1');
+      expect(correctionService.correctRecord).toHaveBeenCalledWith(dto, 'user-1');
     });
   });
 
@@ -322,7 +333,7 @@ describe('CreditController', () => {
     };
 
     it('应该批量矫正记录', async () => {
-      mockCreditService.batchCorrectRecords.mockResolvedValue({
+      mockCorrectionService.batchCorrectRecords.mockResolvedValue({
         success: 2,
         failed: 0,
         results: [],
@@ -331,18 +342,18 @@ describe('CreditController', () => {
       const result = await controller.batchCorrectRecords(dto, mockRequest);
 
       expect(result.success).toBe(2);
-      expect(creditService.batchCorrectRecords).toHaveBeenCalledWith(dto, 'user-1');
+      expect(correctionService.batchCorrectRecords).toHaveBeenCalledWith(dto, 'user-1');
     });
   });
 
   describe('getCorrectionHistory', () => {
     it('应该返回矫正历史', async () => {
-      mockCreditService.getCorrectionHistory.mockResolvedValue([]);
+      mockCorrectionService.getCorrectionHistory.mockResolvedValue([]);
 
       const result = await controller.getCorrectionHistory('record-1');
 
       expect(result).toEqual([]);
-      expect(creditService.getCorrectionHistory).toHaveBeenCalledWith('record-1');
+      expect(correctionService.getCorrectionHistory).toHaveBeenCalledWith('record-1');
     });
   });
 

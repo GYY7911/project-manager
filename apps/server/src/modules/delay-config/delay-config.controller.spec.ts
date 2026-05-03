@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DelayConfigController } from './delay-config.controller';
-import { DelayConfigService, CreateDelayConfigDto, BatchImportDto } from './delay-config.service';
+import { DelayConfigService } from './delay-config.service';
+import { CreateDelayConfigDto, BatchImportDto } from './delay-config.dto';
 import { WorkflowStage } from '@prisma/client';
 
 describe('DelayConfigController', () => {

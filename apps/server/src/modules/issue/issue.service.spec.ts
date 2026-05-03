@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
-import { IssueService, CreateIssueDto, UpdateIssueDto, UpdateIssueStageDto } from './issue.service';
+import { IssueService } from './issue.service';
+import { CreateIssueDto, UpdateIssueDto, UpdateIssueStageDto } from './issue.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { WorkflowStage, IssueStatus, IssueSeverity, UserRole } from '@prisma/client';
 

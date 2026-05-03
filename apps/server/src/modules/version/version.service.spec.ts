@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { VersionService, CreateVersionDto, CreateOrUseVersionDto, UpdateVersionDto } from './version.service';
+import { VersionService } from './version.service';
+import { CreateVersionDto, CreateOrUseVersionDto, UpdateVersionDto } from './version.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { VersionStatus } from '@prisma/client';
 

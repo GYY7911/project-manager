@@ -1,11 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { IssueController } from './issue.controller';
-import {
-  IssueService,
-  CreateIssueDto,
-  UpdateIssueDto,
-  UpdateIssueStageDto,
-} from './issue.service';
+import { IssueService } from './issue.service';
+import { CreateIssueDto, UpdateIssueDto, UpdateIssueStageDto } from './issue.dto';
 import { WorkflowStage, IssueStatus, IssueSeverity, UserRole } from '@prisma/client';
 
 describe('IssueController', () => {

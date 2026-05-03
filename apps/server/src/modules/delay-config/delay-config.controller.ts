@@ -8,7 +8,8 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { DelayConfigService, CreateDelayConfigDto, BatchImportDto } from './delay-config.service';
+import { DelayConfigService } from './delay-config.service';
+import { CreateDelayConfigDto, BatchImportDto } from './delay-config.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';

@@ -9,7 +9,8 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { VersionService, CreateVersionDto, CreateOrUseVersionDto, UpdateVersionDto } from './version.service';
+import { VersionService } from './version.service';
+import { CreateVersionDto, CreateOrUseVersionDto, UpdateVersionDto } from './version.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';

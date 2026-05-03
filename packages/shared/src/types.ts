@@ -303,6 +303,77 @@ export interface UserKanbanConfig {
   updatedAt: Date;
 }
 
+// ============ API DTOs ============
+
+export interface CreateRequirementDto {
+  code: string;
+  title: string;
+  versionId: string;
+  assigneeId: string;
+  workload?: number;
+  dueDate?: string;
+}
+
+export interface CreateIssueDto {
+  code: string;
+  title: string;
+  versionId: string;
+  assigneeId: string;
+  severity: IssueSeverity;
+  testCycleId?: string;
+  dueDate?: string;
+}
+
+export interface CreateCreditRuleDto {
+  name: string;
+  ruleType: CreditRuleType;
+  score: number;
+  description?: string;
+  delayDays?: number;
+}
+
+export interface ManualAdjustCreditDto {
+  userId: string;
+  versionId: string;
+  score: number;
+  remark: string;
+}
+
+export interface ApiError extends Error {
+  response: { data: Record<string, unknown> };
+}
+
+export interface CreditDetailResponse {
+  user: Pick<User, 'id' | 'name' | 'employeeNo' | 'team'>;
+  summary: {
+    totalScore: number;
+    requirementScore: number;
+    issueScore: number;
+    delayDeduction: number;
+    manualAdjustment: number;
+  };
+  records: CreditRecord[];
+  stageStats: { stage: string; onTimeCount: number; delayedCount: number; totalDelayDays: number; totalScore: number }[];
+}
+
+export interface CreditCorrectionResult {
+  correction: { id: string; recordId: string; originalScore: number; newScore: number; reason: string; createdAt: string };
+  scoreDiff: number;
+  message: string;
+}
+
+export interface BatchCorrectResult {
+  success: number;
+  failed: number;
+  results: CreditCorrectionResult[];
+}
+
+export interface VersionBoardData {
+  requirements: (Requirement & { assignee: Pick<User, 'id' | 'name' | 'employeeNo'> })[];
+  issues: (Issue & { assignee: Pick<User, 'id' | 'name' | 'employeeNo'> })[];
+  testCycles: TestCycle[];
+}
+
 // ============ 延期配置类型 ============
 
 // 单个阶段的截止日期配置

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { WorkflowStage } from '@prisma/client';
 
@@ -6,7 +6,7 @@ import { WorkflowStage } from '@prisma/client';
 export class WorkflowService {
   constructor(private prisma: PrismaService) {}
 
-  // 获取默认阶段顺序
+  // Get default stage order
   getDefaultStages(): WorkflowStage[] {
     return [
       WorkflowStage.REQUIREMENT_DESIGN,
@@ -22,7 +22,7 @@ export class WorkflowService {
     ];
   }
 
-  // 获取阶段显示名称
+  // Get stage display label
   getStageLabel(stage: WorkflowStage): string {
     const labels: Record<WorkflowStage, string> = {
       [WorkflowStage.REQUIREMENT_DESIGN]: '需求设计',
@@ -39,7 +39,7 @@ export class WorkflowService {
     return labels[stage];
   }
 
-  // 验证阶段转换是否合法
+  // Validate stage transition rules
   canTransition(from: WorkflowStage, to: WorkflowStage): boolean {
     // 定义允许的转换
     const allowedTransitions: Record<WorkflowStage, WorkflowStage[]> = {
@@ -65,7 +65,7 @@ export class WorkflowService {
     return allowedTransitions[from]?.includes(to) ?? false;
   }
 
-  // 获取实体的工作流日志
+  // Get workflow logs for an entity
   async getWorkflowLogs(entityType: string, entityId: string) {
     return this.prisma.workflowLog.findMany({
       where: { entityType, entityId },
@@ -79,6 +79,36 @@ export class WorkflowService {
         },
       },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async validateAndLogTransition(
+    entityType: 'requirement' | 'issue',
+    entityId: string,
+    currentStage: WorkflowStage,
+    targetStage: WorkflowStage,
+    userId: string,
+    remark?: string,
+    requirementId?: string,
+    issueId?: string,
+  ): Promise<void> {
+    if (!this.canTransition(currentStage, targetStage)) {
+      throw new BadRequestException(
+        `Cannot transition from ${this.getStageLabel(currentStage)} to ${this.getStageLabel(targetStage)}`,
+      );
+    }
+
+    await this.prisma.workflowLog.create({
+      data: {
+        entityType,
+        entityId,
+        fromStage: currentStage,
+        toStage: targetStage,
+        operatedBy: userId,
+        remark,
+        requirementId,
+        issueId,
+      },
     });
   }
 }

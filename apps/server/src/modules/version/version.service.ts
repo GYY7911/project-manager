@@ -7,23 +7,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { VersionStatus } from '@prisma/client';
 import { startOfDay, endOfDay, parseISO } from 'date-fns';
-
-export interface CreateVersionDto {
-  name: string;
-  startDate: string;
-  endDate: string;
-}
-
-export interface CreateOrUseVersionDto extends CreateVersionDto {
-  useExisting?: boolean; // 如果版本已存在，是否使用现有版本
-}
-
-export interface UpdateVersionDto {
-  name?: string;
-  startDate?: string;
-  endDate?: string;
-  status?: VersionStatus;
-}
+import { CreateVersionDto, CreateOrUseVersionDto, UpdateVersionDto } from './version.dto';
 
 export interface DeleteVersionResponse {
   id: string;
@@ -110,7 +94,7 @@ export class VersionService {
       });
     }
 
-    // 创建新版本
+    // Create new version
     const parsedStartDate = parseISO(dto.startDate);
     const parsedEndDate = parseISO(dto.endDate);
 
@@ -205,7 +189,7 @@ export class VersionService {
   async remove(id: string, force: boolean = false): Promise<DeleteVersionResponse | any> {
     const version = await this.findOne(id);
 
-    // 检查关联数据
+    // Check related data
     const [requirements, issues, testCycles] = await Promise.all([
       this.prisma.requirement.count({ where: { versionId: id } }),
       this.prisma.issue.count({ where: { versionId: id } }),
@@ -230,7 +214,7 @@ export class VersionService {
     }
 
     // 强制删除 - 级联删除所有关联数据
-    // 获取需求ID和问题单ID列表
+    // Get requirement IDs and issue IDs
     const requirementIds = requirements > 0
       ? (await this.prisma.requirement.findMany({ where: { versionId: id }, select: { id: true } })).map(r => r.id)
       : [];

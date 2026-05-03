@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { TestCycleService, CreateTestCycleDto } from './test-cycle.service';
+import { TestCycleService } from './test-cycle.service';
+import { CreateTestCycleDto } from './test-cycle.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 
 describe('TestCycleService', () => {

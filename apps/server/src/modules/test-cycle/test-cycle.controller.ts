@@ -10,7 +10,8 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { TestCycleService, CreateTestCycleDto } from './test-cycle.service';
+import { TestCycleService } from './test-cycle.service';
+import { CreateTestCycleDto } from './test-cycle.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';

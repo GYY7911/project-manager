@@ -4,36 +4,16 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { WorkflowService } from '../workflow/workflow.service';
 import { WorkflowStage, RequirementStatus, UserRole } from '@prisma/client';
-
-export interface CreateRequirementDto {
-  code: string;
-  title: string;
-  description?: string;
-  type?: string;
-  versionId: string;
-  assigneeId: string;
-  workload?: number;
-  dueDate?: string;
-}
-
-export interface UpdateRequirementDto {
-  title?: string;
-  description?: string;
-  type?: string;
-  assigneeId?: string;
-  workload?: number;
-  dueDate?: string;
-}
-
-export interface UpdateStageDto {
-  stage: WorkflowStage;
-  remark?: string;
-}
+import { CreateRequirementDto, UpdateRequirementDto, UpdateStageDto } from './requirement.dto';
 
 @Injectable()
 export class RequirementService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private workflowService: WorkflowService,
+  ) {}
 
   async create(dto: CreateRequirementDto) {
     try {
@@ -173,20 +153,16 @@ export class RequirementService {
       throw new ForbiddenException('您只能修改自己负责的需求');
     }
 
-    // 记录工作流日志
-    await this.prisma.workflowLog.create({
-      data: {
-        entityType: 'requirement',
-        entityId: id,
-        fromStage: requirement.currentStage,
-        toStage: dto.stage,
-        operatedBy: userId,
-        remark: dto.remark,
-        requirementId: id,
-      },
-    });
+    await this.workflowService.validateAndLogTransition(
+      'requirement',
+      id,
+      requirement.currentStage,
+      dto.stage,
+      userId,
+      dto.remark,
+      id,
+    );
 
-    // 更新状态
     const status = this.getStatusByStage(dto.stage);
 
     return this.prisma.requirement.update({

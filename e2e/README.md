@@ -43,7 +43,7 @@ pnpm test:e2e:ui
 ### 环境管理
 
 ```bash
-# 环境重置（数据库 + Redis + 缓存）
+# 环境重置（数据库）
 pnpm env:reset
 
 # 完全重置并重启服务
@@ -73,7 +73,6 @@ pnpm env:setup
 1. **全局 Setup** (`e2e/global-setup.ts`)
    - 清理旧进程
    - 重置数据库
-   - 清理 Redis 缓存
    - 启动后端服务 (port 4001)
    - 启动前端服务 (port 4000)
 
@@ -83,7 +82,6 @@ pnpm env:setup
 
 3. **全局 Teardown** (`e2e/global-teardown.ts`)
    - 停止所有服务
-   - 清理 Redis
    - 重置数据库
 
 ### 测试 Fixtures
@@ -134,7 +132,6 @@ const db = getPrisma();
 ```env
 DATABASE_URL="postgresql://postgres:postgres123@localhost:5432/project_manager?schema=public"
 JWT_SECRET="your-super-secret-jwt-key-change-in-production"
-REDIS_URL="redis://localhost:6379"
 PORT=4001
 ```
 

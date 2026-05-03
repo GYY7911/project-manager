@@ -1,17 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-
-export interface CreateTestCycleDto {
-  name: string;
-  versionId: string;
-}
+import { CreateTestCycleDto } from './test-cycle.dto';
 
 @Injectable()
 export class TestCycleService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateTestCycleDto, userId: string) {
-    // 获取当前最大的order
+    // Get current max order
     const maxOrder = await this.prisma.testCycle.aggregate({
       where: { versionId: dto.versionId },
       _max: { order: true },
